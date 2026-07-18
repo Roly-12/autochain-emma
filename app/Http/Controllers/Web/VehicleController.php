@@ -44,7 +44,14 @@ class VehicleController extends Controller
 
         $vehicle->load([
             'maintenances.garageUser',
-            'documents',
+            'documents' => fn ($query) => $query
+                ->when(
+                    ! auth()->user()->roleEnum()->canManageFleet(),
+                    fn ($documents) => $documents->where('is_public', true)
+                )
+                ->where(fn ($documents) => $documents
+                    ->whereNull('expires_at')
+                    ->orWhereDate('expires_at', '>=', now()->toDateString())),
             'fuelLogs' => fn ($q) => $q->limit(10),
             'mileageLogs' => fn ($q) => $q->limit(20),
             'alerts' => fn ($q) => $q->open()->limit(10),
@@ -170,11 +177,10 @@ class VehicleController extends Controller
             'next_maintenance_mileage' => 'nullable|integer|min:0',
         ]);
 
+        $oldPhoto = null;
         if ($request->hasFile('photo')) {
             try {
-                if ($vehicle->photo_path) {
-                    Storage::disk('public')->delete($vehicle->photo_path);
-                }
+                $oldPhoto = $vehicle->photo_path;
                 $data['photo_path'] = $images->storeAsJpeg($request->file('photo'), 'vehicles', 1600);
             } catch (InvalidArgumentException $e) {
                 return back()->withErrors(['photo' => $e->getMessage()])->withInput();
@@ -185,6 +191,10 @@ class VehicleController extends Controller
 
         // VIN et km certifié : non modifiables ici (intégrité / blockchain)
         $vehicle->update($data);
+
+        if ($oldPhoto) {
+            Storage::disk((string) config('filesystems.media_disk', 'public'))->delete($oldPhoto);
+        }
 
         return redirect()->route('vehicles.show', $vehicle)->with('success', 'Informations administratives mises à jour.');
     }
@@ -208,11 +218,13 @@ class VehicleController extends Controller
         ]);
 
         try {
-            if ($vehicle->photo_path) {
-                Storage::disk('public')->delete($vehicle->photo_path);
-            }
+            $oldPhoto = $vehicle->photo_path;
             $path = $images->storeAsJpeg($request->file('photo'), 'vehicles', 1600);
             $vehicle->update(['photo_path' => $path]);
+
+            if ($oldPhoto) {
+                Storage::disk((string) config('filesystems.media_disk', 'public'))->delete($oldPhoto);
+            }
         } catch (InvalidArgumentException $e) {
             return back()->withErrors(['photo' => $e->getMessage()]);
         }

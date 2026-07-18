@@ -23,7 +23,11 @@ class DocumentController extends Controller
         $documents = VehicleDocument::with(['vehicle', 'uploader'])
             ->when(
                 ! $request->user()->roleEnum()->canManageFleet(),
-                fn ($query) => $query->where('is_public', true)
+                fn ($query) => $query
+                    ->where('is_public', true)
+                    ->where(fn ($documents) => $documents
+                        ->whereNull('expires_at')
+                        ->orWhereDate('expires_at', '>=', now()->toDateString()))
             )
             ->when($request->vehicle_id, fn ($q, $id) => $q->where('vehicle_id', $id))
             ->orderByDesc('created_at')
@@ -61,14 +65,15 @@ class DocumentController extends Controller
 
         $file = $request->file('file');
         $hash = hash_file('sha256', $file->getRealPath());
-        $path = $file->store('documents/'.$data['vehicle_id'], 'local');
+        $documentsDisk = (string) config('filesystems.documents_disk', 'local');
+        $path = $file->store('documents/'.$data['vehicle_id'], $documentsDisk);
 
         $cid = null;
         if ($request->boolean('is_public') || $data['type'] === 'certificat_inspection') {
             $cid = $ipfs->add($file);
 
             if (! $cid) {
-                Storage::disk('local')->delete($path);
+                Storage::disk($documentsDisk)->delete($path);
 
                 return back()->withErrors([
                     'file' => 'La publication IPFS a échoué. Le document n’a pas été enregistré comme public.',
@@ -106,11 +111,7 @@ class DocumentController extends Controller
     {
         $this->authorize('view', $document);
 
-        $valid = Storage::disk('local')->exists($document->file_path)
-            && hash_equals(
-                $document->content_hash,
-                hash_file('sha256', Storage::disk('local')->path($document->file_path))
-            );
+        $valid = $this->documentIsValid($document);
 
         DocumentAccessLog::create([
             'vehicle_document_id' => $document->id,
@@ -123,18 +124,15 @@ class DocumentController extends Controller
 
         abort_unless($valid, 409, 'Le document ne correspond plus à son empreinte SHA-256.');
 
-        return Storage::disk('local')->download($document->file_path, $document->original_name ?? $document->title);
+        return Storage::disk((string) config('filesystems.documents_disk', 'local'))
+            ->download($document->file_path, $document->original_name ?? $document->title);
     }
 
     public function verify(Request $request, VehicleDocument $document): \Illuminate\Http\JsonResponse
     {
         $this->authorize('view', $document);
 
-        $valid = Storage::disk('local')->exists($document->file_path)
-            && hash_equals(
-                $document->content_hash,
-                hash_file('sha256', Storage::disk('local')->path($document->file_path))
-            );
+        $valid = $this->documentIsValid($document);
 
         DocumentAccessLog::create([
             'vehicle_document_id' => $document->id,
@@ -159,9 +157,33 @@ class DocumentController extends Controller
     {
         $this->authorize('delete', $document);
 
-        Storage::disk('local')->delete($document->file_path);
+        Storage::disk((string) config('filesystems.documents_disk', 'local'))->delete($document->file_path);
         $document->delete();
 
         return back()->with('success', 'Document supprimé.');
+    }
+
+    private function documentIsValid(VehicleDocument $document): bool
+    {
+        $disk = Storage::disk((string) config('filesystems.documents_disk', 'local'));
+
+        if (! $disk->exists($document->file_path)) {
+            return false;
+        }
+
+        $stream = $disk->readStream($document->file_path);
+        if (! is_resource($stream)) {
+            return false;
+        }
+
+        try {
+            $context = hash_init('sha256');
+            hash_update_stream($context, $stream);
+            $actualHash = hash_final($context);
+        } finally {
+            fclose($stream);
+        }
+
+        return hash_equals($document->content_hash, $actualHash);
     }
 }

@@ -39,11 +39,16 @@ class BlockchainServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadDeploymentConfig();
+        $this->loadContractAbi();
         $this->validateDeploymentConfig();
     }
 
     protected function loadDeploymentConfig(): void
     {
+        if ($this->app->environment('testing')) {
+            return;
+        }
+
         if (! config('blockchain.load_deployment_file')) {
             return;
         }
@@ -78,6 +83,29 @@ class BlockchainServiceProvider extends ServiceProvider
         ]);
     }
 
+    protected function loadContractAbi(): void
+    {
+        if (config('blockchain.contract_abi')) {
+            return;
+        }
+
+        $abiPath = (string) config('blockchain.contract_abi_file');
+        if (! is_file($abiPath)) {
+            return;
+        }
+
+        $contents = json_decode((string) file_get_contents($abiPath), true);
+        $abi = is_array($contents) && isset($contents['abi'])
+            ? $contents['abi']
+            : $contents;
+
+        if (! is_array($abi) || $abi === []) {
+            throw new \RuntimeException('Le fichier ABI blockchain est invalide.');
+        }
+
+        config(['blockchain.contract_abi' => json_encode($abi, JSON_THROW_ON_ERROR)]);
+    }
+
     protected function validateDeploymentConfig(): void
     {
         if ($this->app->environment(['local', 'testing'])) {
@@ -97,7 +125,7 @@ class BlockchainServiceProvider extends ServiceProvider
             'BLOCKCHAIN_NODE_URL' => $nodeUrl,
             'BLOCKCHAIN_CONTRACT_ADDRESS' => $contractAddress,
             'BLOCKCHAIN_ADMIN_ADDRESS' => $adminAddress,
-            'VEHICLE_REGISTRY_ABI' => $abi,
+            'VEHICLE_REGISTRY_ABI ou BLOCKCHAIN_ABI_FILE' => $abi,
         ];
 
         foreach ($required as $name => $value) {

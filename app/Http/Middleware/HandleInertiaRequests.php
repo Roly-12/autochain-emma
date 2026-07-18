@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -33,11 +34,13 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         $role = $user?->roleEnum();
-        $siteOwner = User::query()
-            ->where('role', UserRole::SuperAdmin->value)
-            ->whereNotNull('company_logo_path')
-            ->oldest('id')
-            ->first();
+        $siteOwner = Schema::hasTable('users')
+            ? User::query()
+                ->where('role', UserRole::SuperAdmin->value)
+                ->whereNotNull('company_logo_path')
+                ->oldest('id')
+                ->first()
+            : null;
 
         return [
             ...parent::share($request),

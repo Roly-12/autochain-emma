@@ -42,4 +42,21 @@ Préparer un environnement Laravel de production sécurisé et compatible avec P
 
 ## Statut
 
-`En attente du choix de l’hébergeur et du domaine`.
+`Configuration Render gratuite préparée le 18/07/2026`.
+
+- Plateforme : Render Web Service gratuit avec Docker.
+- Base PostgreSQL : Supabase Emma+ en `eu-west-1`.
+- Stockage : buckets Supabase `autochain-public` et `autochain-private`.
+- Queue : mode `sync`, car les workers Render sont payants.
+- Scheduler : best effort pendant que le service Web est éveillé.
+- Blockchain : contrat Sepolia `0xB04b51e7B65684c409ff45d360342f0a82E18ea0`.
+- Fichiers créés : `Dockerfile`, `docker/entrypoint.sh`, `.dockerignore` et `render.yaml`.
+
+Restent à saisir directement dans Render :
+
+- `APP_KEY`.
+- `DB_URL` obtenue avec le Session Pooler Supabase.
+- Identifiants S3 Supabase.
+- Adresse e-mail et mot de passe initial du Super Admin.
+
+Le service gratuit se met en veille après quinze minutes et ne doit pas être présenté comme une production permanente.

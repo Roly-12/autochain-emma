@@ -14,8 +14,11 @@ class VehicleDocumentPolicy
 
     public function view(User $user, VehicleDocument $document): bool
     {
+        $publicAndAvailable = $document->is_public
+            && (! $document->expires_at || $document->expires_at->isToday() || $document->expires_at->isFuture());
+
         return $user->is_active
-            && ($document->is_public || $user->roleEnum()->canManageFleet());
+            && ($publicAndAvailable || $user->roleEnum()->canManageFleet());
     }
 
     public function create(User $user): bool

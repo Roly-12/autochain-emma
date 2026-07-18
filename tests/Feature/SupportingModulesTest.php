@@ -70,10 +70,11 @@ class SupportingModulesTest extends TestCase
 
     public function test_tampered_document_is_not_downloaded(): void
     {
-        Storage::fake('local');
+        Storage::fake('remote-documents');
+        config(['filesystems.documents_disk' => 'remote-documents']);
         $manager = User::factory()->create(['role' => UserRole::GestionnaireParc]);
         $vehicle = $this->vehicle();
-        Storage::disk('local')->put('documents/test.pdf', 'modified');
+        Storage::disk('remote-documents')->put('documents/test.pdf', 'modified');
         $document = VehicleDocument::create([
             'vehicle_id' => $vehicle->id,
             'type' => 'assurance',

@@ -31,6 +31,10 @@ return [
 
     // ABI JSON du contrat (ou deployment.json en développement local)
     'contract_abi' => env('VEHICLE_REGISTRY_ABI', ''),
+    'contract_abi_file' => env(
+        'BLOCKCHAIN_ABI_FILE',
+        base_path('blockchain/deployment.json')
+    ),
 
     // Timeout des transactions (en secondes)
     'timeout' => env('BLOCKCHAIN_TIMEOUT', 30),

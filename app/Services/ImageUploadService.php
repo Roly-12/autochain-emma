@@ -10,10 +10,11 @@ use InvalidArgumentException;
 class ImageUploadService
 {
     /**
-     * Stocke une image en JPEG (compatible navigateurs) sous storage/app/public.
+     * Convertit puis stocke une image JPEG sur le disque média configuré.
      */
     public function storeAsJpeg(UploadedFile $file, string $directory, int $maxWidth = 1200): string
     {
+        $disk = (string) config('filesystems.media_disk', 'public');
         $mime = (string) $file->getMimeType();
         $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
@@ -24,7 +25,7 @@ class ImageUploadService
         }
 
         if (! extension_loaded('gd')) {
-            return $file->store($directory, 'public');
+            throw new InvalidArgumentException('L’extension PHP GD est requise pour traiter les images.');
         }
 
         $raw = @file_get_contents($file->getRealPath());
@@ -51,11 +52,29 @@ class ImageUploadService
         }
 
         $filename = $directory.'/'.Str::uuid()->toString().'.jpg';
-        $absolute = Storage::disk('public')->path($filename);
-        Storage::disk('public')->makeDirectory($directory);
-
-        imagejpeg($source, $absolute, 85);
+        ob_start();
+        $encoded = imagejpeg($source, null, 85);
+        $jpeg = ob_get_clean();
         imagedestroy($source);
+
+        if (! $encoded || ! is_string($jpeg)) {
+            throw new InvalidArgumentException('Impossible d’encoder l’image en JPEG.');
+        }
+
+        try {
+            $stored = Storage::disk($disk)->put($filename, $jpeg, [
+                'ContentType' => 'image/jpeg',
+            ]);
+        } catch (\Throwable $exception) {
+            throw new InvalidArgumentException(
+                'Impossible d’enregistrer l’image sur le stockage configuré.',
+                previous: $exception
+            );
+        }
+
+        if (! $stored) {
+            throw new InvalidArgumentException('Impossible d’enregistrer l’image.');
+        }
 
         return $filename;
     }

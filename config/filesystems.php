@@ -9,6 +9,8 @@ return [
     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
+    'media_disk' => env('MEDIA_DISK', 'public'),
+    'documents_disk' => env('DOCUMENTS_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -43,6 +45,29 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+        ],
+
+        'supabase_media' => [
+            'driver' => 's3',
+            'key' => env('SUPABASE_STORAGE_ACCESS_KEY_ID'),
+            'secret' => env('SUPABASE_STORAGE_SECRET_ACCESS_KEY'),
+            'region' => env('SUPABASE_STORAGE_REGION', 'eu-west-1'),
+            'bucket' => env('SUPABASE_MEDIA_BUCKET', 'autochain-public'),
+            'url' => env('SUPABASE_MEDIA_URL'),
+            'endpoint' => env('SUPABASE_STORAGE_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+        ],
+
+        'supabase_documents' => [
+            'driver' => 's3',
+            'key' => env('SUPABASE_STORAGE_ACCESS_KEY_ID'),
+            'secret' => env('SUPABASE_STORAGE_SECRET_ACCESS_KEY'),
+            'region' => env('SUPABASE_STORAGE_REGION', 'eu-west-1'),
+            'bucket' => env('SUPABASE_DOCUMENTS_BUCKET', 'autochain-private'),
+            'endpoint' => env('SUPABASE_STORAGE_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
         ],
 
     ],

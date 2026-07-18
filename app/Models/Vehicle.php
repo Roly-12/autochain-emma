@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Vehicle extends Model
 {
@@ -52,7 +53,15 @@ class Vehicle extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->photo_path ? '/storage/'.$this->photo_path : null;
+        if (! $this->photo_path) {
+            return null;
+        }
+
+        $disk = (string) config('filesystems.media_disk', 'public');
+
+        return $disk === 'public'
+            ? '/storage/'.$this->photo_path
+            : Storage::disk($disk)->url($this->photo_path);
     }
 
     public function getRouteKeyName(): string

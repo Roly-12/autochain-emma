@@ -1,0 +1,90 @@
+services:
+  - type: web
+    name: autochain-emma
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /up
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_NAME
+        value: AutoChain Emma+
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://autochain-emma.onrender.com
+      - key: APP_KEY
+        sync: false
+      - key: AUTOCHAIN_ADMIN_NAME
+        value: Super Admin
+      - key: AUTOCHAIN_ADMIN_EMAIL
+        sync: false
+      - key: AUTOCHAIN_ADMIN_PASSWORD
+        sync: false
+      - key: APP_LOCALE
+        value: fr
+      - key: APP_FALLBACK_LOCALE
+        value: fr
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      - key: MEDIA_DISK
+        value: supabase_media
+      - key: DOCUMENTS_DISK
+        value: supabase_documents
+      - key: SUPABASE_STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: SUPABASE_STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_REGION
+        value: eu-west-1
+      - key: SUPABASE_STORAGE_ENDPOINT
+        value: https://aadgjifomyxkhzljydp.storage.supabase.co/storage/v1/s3
+      - key: SUPABASE_MEDIA_BUCKET
+        value: autochain-public
+      - key: SUPABASE_DOCUMENTS_BUCKET
+        value: autochain-private
+      - key: SUPABASE_MEDIA_URL
+        value: https://aadgjifomyxkhzljydp.supabase.co/storage/v1/object/public/autochain-public
+
+      - key: MAIL_MAILER
+        value: log
+      - key: IPFS_ENABLED
+        value: "false"
+
+      - key: BLOCKCHAIN_LOAD_DEPLOYMENT_FILE
+        value: "false"
+      - key: BLOCKCHAIN_NETWORK
+        value: sepolia
+      - key: BLOCKCHAIN_CHAIN_ID
+        value: "11155111"
+      - key: BLOCKCHAIN_NODE_URL
+        value: https://ethereum-sepolia-rpc.publicnode.com
+      - key: BLOCKCHAIN_CONTRACT_ADDRESS
+        value: 0xB04b51e7B65684c409ff45d360342f0a82E18ea0
+      - key: BLOCKCHAIN_ADMIN_ADDRESS
+        value: 0xd8Ff9440467acA014840D75473e54BE880761603
+      - key: BLOCKCHAIN_TIMEOUT
+        value: "30"

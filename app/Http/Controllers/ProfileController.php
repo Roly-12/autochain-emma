@@ -28,22 +28,31 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
+        $mediaDisk = (string) config('filesystems.media_disk', 'public');
+        $oldMedia = [];
+        $newMedia = [];
 
         try {
             if ($request->hasFile('avatar')) {
                 if ($user->avatar_path) {
-                    Storage::disk('public')->delete($user->avatar_path);
+                    $oldMedia[] = $user->avatar_path;
                 }
                 $data['avatar_path'] = $images->storeAsJpeg($request->file('avatar'), 'avatars', 512);
+                $newMedia[] = $data['avatar_path'];
             }
 
             if ($request->hasFile('company_logo')) {
                 if ($user->company_logo_path) {
-                    Storage::disk('public')->delete($user->company_logo_path);
+                    $oldMedia[] = $user->company_logo_path;
                 }
                 $data['company_logo_path'] = $images->storeAsJpeg($request->file('company_logo'), 'branding', 800);
+                $newMedia[] = $data['company_logo_path'];
             }
         } catch (InvalidArgumentException $e) {
+            foreach ($newMedia as $path) {
+                Storage::disk($mediaDisk)->delete($path);
+            }
+
             return back()->withErrors(['avatar' => $e->getMessage()]);
         }
 
@@ -56,6 +65,10 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        foreach (array_unique($oldMedia) as $path) {
+            Storage::disk($mediaDisk)->delete($path);
+        }
 
         return Redirect::route('profile.edit')->with('success', 'Profil mis à jour.');
     }

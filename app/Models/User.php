@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'name',
@@ -52,13 +53,12 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        // Chemin relatif : évite localhost vs 127.0.0.1:8000
-        return $this->avatar_path ? '/storage/'.$this->avatar_path : null;
+        return $this->mediaUrl($this->avatar_path);
     }
 
     public function getCompanyLogoUrlAttribute(): ?string
     {
-        return $this->company_logo_path ? '/storage/'.$this->company_logo_path : null;
+        return $this->mediaUrl($this->company_logo_path);
     }
 
     public function roleEnum(): UserRole
@@ -102,5 +102,18 @@ class User extends Authenticatable
     public function fuelLogs(): HasMany
     {
         return $this->hasMany(FuelLog::class, 'recorded_by');
+    }
+
+    private function mediaUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        $disk = (string) config('filesystems.media_disk', 'public');
+
+        return $disk === 'public'
+            ? '/storage/'.$path
+            : Storage::disk($disk)->url($path);
     }
 }
