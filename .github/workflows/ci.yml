@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: autochain_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, bcmath, gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist
+      - run: npm ci
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: autochain_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+      - run: npm run build
+
+  smart-contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: blockchain
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: blockchain/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  hardhat-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: blockchain/package-lock.json
+      - run: composer install --no-interaction --prefer-dist
+      - run: npm ci
+        working-directory: blockchain
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Start and deploy Hardhat
+        shell: bash
+        run: |
+          cd blockchain
+          npm run node > /tmp/hardhat.log 2>&1 &
+          for i in {1..30}; do
+            curl -s -X POST -H 'Content-Type: application/json' \
+              --data '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' \
+              http://127.0.0.1:8545 && break
+            sleep 1
+          done
+          npm run deploy:localhost
+      - run: php artisan test --group=hardhat
+        env:
+          RUN_HARDHAT_TESTS: true
+          BLOCKCHAIN_NODE_URL: http://127.0.0.1:8545

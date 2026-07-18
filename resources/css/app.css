@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    .dark {
+        color-scheme: dark;
+    }
+
+    /* Propager le mode sombre aux cartes / textes sans dark: sur chaque page */
+    .dark .bg-white {
+        background-color: rgb(15 23 42) !important; /* slate-900 */
+    }
+
+    .dark .bg-slate-50,
+    .dark .bg-gray-50,
+    .dark .bg-gray-100 {
+        background-color: rgb(30 41 59) !important; /* slate-800 */
+    }
+
+    .dark .text-slate-900,
+    .dark .text-gray-900,
+    .dark .text-gray-800,
+    .dark h1,
+    .dark h2,
+    .dark h3,
+    .dark h4 {
+        color: rgb(248 250 252) !important; /* slate-50 */
+    }
+
+    .dark .text-slate-700,
+    .dark .text-slate-600,
+    .dark .text-gray-700,
+    .dark .text-gray-600 {
+        color: rgb(203 213 225) !important; /* slate-300 */
+    }
+
+    .dark .text-slate-500,
+    .dark .text-gray-500 {
+        color: rgb(148 163 184) !important; /* slate-400 */
+    }
+
+    .dark .border-slate-200,
+    .dark .border-slate-100,
+    .dark .border-gray-200,
+    .dark .border-gray-100 {
+        border-color: rgb(51 65 85) !important; /* slate-700 */
+    }
+
+    .dark input,
+    .dark select,
+    .dark textarea {
+        background-color: rgb(30 41 59);
+        border-color: rgb(71 85 105);
+        color: rgb(248 250 252);
+    }
+
+    .dark table thead {
+        background-color: rgb(30 41 59) !important;
+    }
+}

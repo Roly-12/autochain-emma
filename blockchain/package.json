@@ -1,0 +1,23 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "node": "npx hardhat node",
+    "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.js",
+    "deploy": "node ./scripts/deploy.js",
+    "deploy:sepolia": "npx hardhat --config ./hardhat.config.js run --network sepolia scripts/deploy.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

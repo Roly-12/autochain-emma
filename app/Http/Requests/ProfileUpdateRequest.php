@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\User;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class ProfileUpdateRequest extends FormRequest
+{
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ],
+            'phone_number' => ['nullable', 'string', 'max:30'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'bio' => ['nullable', 'string', 'max:1000'],
+            'theme_preference' => ['nullable', 'in:light,dark,system'],
+            'notification_email' => ['nullable', 'boolean'],
+            'avatar' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
+            'company_logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
+        ];
+    }
+}
