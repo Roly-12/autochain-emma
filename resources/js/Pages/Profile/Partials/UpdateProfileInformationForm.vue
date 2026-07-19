@@ -79,7 +79,7 @@ const submit = () => {
                         <input type="file" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp" @change="onAvatar" class="text-sm" />
                     </div>
                     <InputError class="mt-2" :message="form.errors.avatar" />
-                    <p class="mt-2 text-xs text-slate-500">JPG, PNG, GIF ou WebP (pas HEIC iPhone). Max 4 Mo.</p>
+                    <p class="mt-2 text-xs text-slate-500">JPG, PNG, GIF ou WebP (pas HEIC iPhone). Max 8 Mo.</p>
                 </div>
 
                 <div v-if="canManageBranding" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">

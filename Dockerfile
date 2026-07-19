@@ -41,6 +41,10 @@ RUN apt-get update \
         '    Require all granted' \
         '</Directory>' \
         > /etc/apache2/conf-available/laravel.conf \
+    && printf '%s\n' \
+        'upload_max_filesize=10M' \
+        'post_max_size=12M' \
+        > /usr/local/etc/php/conf.d/autochain-uploads.ini \
     && a2enconf laravel \
     && rm -rf /var/lib/apt/lists/*
 

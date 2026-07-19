@@ -70,7 +70,13 @@ services:
         value: https://aadgjifomyxkhzljydp.supabase.co/storage/v1/object/public/autochain-public
 
       - key: MAIL_MAILER
-        value: log
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_API_ENDPOINT
+        value: https://api.brevo.com/v3/smtp/email
+      - key: BREVO_API_TIMEOUT
+        value: "15"
       - key: IPFS_ENABLED
         value: "false"
 
