@@ -11,9 +11,11 @@ defineProps({
     status: String,
 });
 
-const user = usePage().props.auth.user;
+const page = usePage();
+const user = page.props.auth.user;
+const canManageBranding = page.props.permissions?.role === 'super_admin';
 const avatarPreview = ref(user.avatar_url);
-const logoPreview = ref(user.company_logo_url);
+const logoPreview = ref(canManageBranding ? user.company_logo_url : null);
 
 const form = useForm({
     name: user.name,
@@ -24,7 +26,7 @@ const form = useForm({
     theme_preference: user.theme_preference ?? 'system',
     notification_email: user.notification_email ?? true,
     avatar: null,
-    company_logo: null,
+    ...(canManageBranding ? { company_logo: null } : {}),
 });
 
 const onAvatar = (e) => {
@@ -52,7 +54,7 @@ const submit = () => {
         <header>
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Informations du profil</h2>
             <p class="mt-1 text-sm text-slate-500">
-                Photo, logo entreprise, thème, wallet et coordonnées.
+                Photo, thème, wallet et coordonnées.
             </p>
         </header>
 
@@ -80,7 +82,7 @@ const submit = () => {
                     <p class="mt-2 text-xs text-slate-500">JPG, PNG, GIF ou WebP (pas HEIC iPhone). Max 4 Mo.</p>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+                <div v-if="canManageBranding" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
                     <InputLabel value="Logo entreprise (navbar)" />
                     <div class="mt-3 flex items-center gap-4">
                         <img

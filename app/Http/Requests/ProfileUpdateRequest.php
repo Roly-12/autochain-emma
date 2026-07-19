@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +31,13 @@ class ProfileUpdateRequest extends FormRequest
             'theme_preference' => ['nullable', 'in:light,dark,system'],
             'notification_email' => ['nullable', 'boolean'],
             'avatar' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
-            'company_logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
+            'company_logo' => [
+                Rule::prohibitedIf(fn () => ! $this->user()->hasRole(UserRole::SuperAdmin)),
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,gif,webp',
+                'max:4096',
+            ],
         ];
     }
 }

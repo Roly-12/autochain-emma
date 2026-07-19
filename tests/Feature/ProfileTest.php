@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -59,6 +61,25 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+    }
+
+    public function test_only_super_admin_can_upload_the_company_logo(): void
+    {
+        $buyer = User::factory()->create([
+            'role' => UserRole::Auditeur,
+        ]);
+
+        $response = $this
+            ->actingAs($buyer)
+            ->post('/profile', [
+                '_method' => 'patch',
+                'name' => $buyer->name,
+                'email' => $buyer->email,
+                'company_logo' => UploadedFile::fake()->create('logo.jpg', 10, 'image/jpeg'),
+            ]);
+
+        $response->assertSessionHasErrors('company_logo');
+        $this->assertNull($buyer->fresh()->company_logo_path);
     }
 
     public function test_user_can_delete_their_account(): void

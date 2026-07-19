@@ -85,13 +85,7 @@ class User extends Authenticatable
 
     public function requiresMfa(): bool
     {
-        if ($this->mfa_enabled) {
-            return true;
-        }
-
-        $domain = strtolower((string) str($this->email)->after('@')->toString());
-
-        return in_array($domain, ['gmail.com', 'icloud.com'], true);
+        return true;
     }
 
     public function assignedVehicles(): HasMany

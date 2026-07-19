@@ -48,7 +48,20 @@ class AuthenticatedSessionController extends Controller
 
         if ($user?->requiresMfa()) {
             $code = random_int(100000, 999999);
-            $user->notify(new MfaCodeNotification((string) $code));
+
+            try {
+                $user->notify(new MfaCodeNotification((string) $code));
+            } catch (\Throwable $exception) {
+                report($exception);
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Impossible d’envoyer le code de vérification. Réessayez dans quelques instants.',
+                ]);
+            }
+
             $request->session()->put('mfa_code', (string) $code);
             $request->session()->put('mfa_user_id', $user->getKey());
             $request->session()->put('mfa_expires_at', now()->addMinutes(10)->timestamp);

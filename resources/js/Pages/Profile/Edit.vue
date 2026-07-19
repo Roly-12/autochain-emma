@@ -12,6 +12,7 @@ defineProps({
 });
 
 const user = computed(() => usePage().props.auth.user);
+const canManageBranding = computed(() => usePage().props.permissions?.role === 'super_admin');
 </script>
 
 <template>
@@ -40,7 +41,7 @@ const user = computed(() => usePage().props.auth.user);
                     </div>
                 </div>
                 <img
-                    v-if="user.company_logo_url"
+                    v-if="canManageBranding && user.company_logo_url"
                     :src="user.company_logo_url"
                     alt="Logo entreprise"
                     class="h-12 w-auto max-w-[160px] object-contain"

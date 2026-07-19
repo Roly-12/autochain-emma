@@ -12,14 +12,14 @@ class MfaTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_users_with_mfa_enabled_are_redirected_to_verification_step_after_login(): void
+    public function test_all_users_are_redirected_to_verification_step_after_login(): void
     {
         Notification::fake();
 
         $user = User::factory()->create([
-            'email' => 'user@gmail.com',
+            'email' => 'user@company.test',
             'password' => bcrypt('password'),
-            'mfa_enabled' => true,
+            'mfa_enabled' => false,
         ]);
 
         $response = $this->post('/login', [

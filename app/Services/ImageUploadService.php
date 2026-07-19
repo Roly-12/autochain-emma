@@ -66,6 +66,8 @@ class ImageUploadService
                 'ContentType' => 'image/jpeg',
             ]);
         } catch (\Throwable $exception) {
+            report($exception);
+
             throw new InvalidArgumentException(
                 'Impossible d’enregistrer l’image sur le stockage configuré.',
                 previous: $exception

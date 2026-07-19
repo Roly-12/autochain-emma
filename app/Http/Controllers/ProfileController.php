@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\ImageUploadService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -31,6 +32,7 @@ class ProfileController extends Controller
         $mediaDisk = (string) config('filesystems.media_disk', 'public');
         $oldMedia = [];
         $newMedia = [];
+        $mediaField = 'avatar';
 
         try {
             if ($request->hasFile('avatar')) {
@@ -41,7 +43,8 @@ class ProfileController extends Controller
                 $newMedia[] = $data['avatar_path'];
             }
 
-            if ($request->hasFile('company_logo')) {
+            if ($user->hasRole(UserRole::SuperAdmin) && $request->hasFile('company_logo')) {
+                $mediaField = 'company_logo';
                 if ($user->company_logo_path) {
                     $oldMedia[] = $user->company_logo_path;
                 }
@@ -53,7 +56,7 @@ class ProfileController extends Controller
                 Storage::disk($mediaDisk)->delete($path);
             }
 
-            return back()->withErrors(['avatar' => $e->getMessage()]);
+            return back()->withErrors([$mediaField => $e->getMessage()]);
         }
 
         unset($data['avatar'], $data['company_logo']);
