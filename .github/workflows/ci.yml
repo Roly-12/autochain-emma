@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  APP_ENV: testing
+
 jobs:
   application:
     runs-on: ubuntu-latest
