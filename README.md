@@ -71,7 +71,7 @@ Configurer le RPC et le compte de déploiement uniquement dans l’environnement
 
 Un document n’est rendu public qu’après validation et pinning de son CID. Renseigner `IPFS_API_URL`, `IPFS_GATEWAY_URL` et `IPFS_ENABLED=true` pour le fournisseur choisi.
 
-Configurer un SMTP réel avec `MAIL_MAILER=smtp`. Vérifier le scheduler avec :
+Sur Render Free, les ports SMTP sont bloqués. La production utilise donc l’API HTTPS Brevo avec `MAIL_MAILER=brevo`, `BREVO_API_KEY` et une valeur `MAIL_FROM_ADDRESS` vérifiée. Vérifier le scheduler avec :
 
 ```bash
 php artisan schedule:list
@@ -88,3 +88,14 @@ npm test
 ```
 
 La commande `php artisan blockchain:reconcile` reprend les receipts encore soumis. Les événements confirmés sont indexés dans la timeline.
+
+## Environnement hébergé
+
+- Application : https://autochain-emma.onrender.com
+- Conteneur : `ghcr.io/roly-12/autochain-emma:latest`
+- Base et stockage : Supabase PostgreSQL et buckets S3-compatible
+- Blockchain : Sepolia, chain ID `11155111`
+- Contrat : `0xB04b51e7B65684c409ff45d360342f0a82E18ea0`
+- E-mail : API HTTPS Brevo
+
+L’offre Render Free peut mettre le service en veille. La queue est synchrone et le scheduler fonctionne en best effort lorsque le service est actif.

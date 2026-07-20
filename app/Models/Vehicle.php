@@ -39,9 +39,9 @@ class Vehicle extends Model
     protected $casts = [
         'mileage_certified_at' => 'datetime',
         'assigned_at' => 'datetime',
-        'technical_control_deadline' => 'date',
-        'insurance_expiry' => 'date',
-        'next_maintenance_date' => 'date',
+        'technical_control_deadline' => 'date:Y-m-d',
+        'insurance_expiry' => 'date:Y-m-d',
+        'next_maintenance_date' => 'date:Y-m-d',
     ];
 
     protected $appends = ['mileage', 'photo_url'];

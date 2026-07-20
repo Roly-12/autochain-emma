@@ -4,7 +4,7 @@ Ce dossier décrit, dans l’ordre, les étapes restantes avant une mise en lign
 
 ## Point de reprise
 
-Commencer par **l’étape 03**. La configuration a été durcie et le contrat est maintenant déployé sur Sepolia.
+L’hébergement est opérationnel sur https://autochain-emma.onrender.com. Les prochaines interventions concernent uniquement la validation périodique, les sauvegardes et les services optionnels comme IPFS.
 
 ## Ordre des étapes
 
@@ -110,23 +110,24 @@ Si `php artisan` indique que le pilote PostgreSQL est absent, sélectionner dans
 
 ## État actuel
 
-- Application Laravel/PostgreSQL : fonctionnelle en local.
+- Application Laravel/PostgreSQL : fonctionnelle en local et sur Render.
 - Frontend Vue/Inertia : fonctionnel.
 - Contrat Solidity : testé avec Hardhat.
 - Wallets MetaMask : liaison par challenge et signature validée.
 - Parcours véhicule, affectation, kilométrage, maintenance et vente : validés localement.
 - Documentation utilisateur : disponible dans `Utilisateur/`.
 - Déploiement Sepolia : terminé, contrat `0xB04b51e7B65684c409ff45d360342f0a82E18ea0`.
-- Hébergement : à configurer.
+- Hébergement : opérationnel sur Render Free via l’image Docker GHCR.
+- Base et médias : Supabase PostgreSQL et stockage S3-compatible validés.
+- MFA : obligatoire pour tous et envoyé par l’API HTTPS Brevo.
+- Sepolia en production : création et signature d’un véhicule validées.
 
-## Informations à préparer au retour
+## Informations à conserver
 
-- Nom de l’hébergeur et type d’offre.
-- Nom de domaine ou sous-domaine.
-- Accès PostgreSQL.
-- URL RPC Sepolia.
-- Wallet administrateur Sepolia et son solde public.
-- Fournisseur SMTP.
-- Fournisseur IPFS ou nœud Kubo.
+- URL Render et accès au service.
+- Accès PostgreSQL et stockage Supabase.
+- Clé API Brevo et expéditeur vérifié.
+- URL RPC Sepolia, contrat et wallet administrateur.
+- Fournisseur IPFS ou nœud Kubo si la publication IPFS est activée.
 
 Ne jamais inscrire une clé privée, une phrase de récupération ou un mot de passe dans ces fichiers.

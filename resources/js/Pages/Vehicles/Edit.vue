@@ -5,6 +5,19 @@ import { ref } from 'vue';
 
 const props = defineProps({ vehicle: Object });
 
+const toDateInput = (value) => {
+    if (!value) {
+        return '';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return String(value).slice(0, 10);
+    }
+
+    return date.toISOString().slice(0, 10);
+};
+
 const form = useForm({
     license_plate: props.vehicle.license_plate,
     brand: props.vehicle.brand,
@@ -12,9 +25,9 @@ const form = useForm({
     year: props.vehicle.year,
     fuel_type: props.vehicle.fuel_type || 'essence',
     status: props.vehicle.status,
-    technical_control_deadline: props.vehicle.technical_control_deadline || '',
-    insurance_expiry: props.vehicle.insurance_expiry || '',
-    next_maintenance_date: props.vehicle.next_maintenance_date || '',
+    technical_control_deadline: toDateInput(props.vehicle.technical_control_deadline),
+    insurance_expiry: toDateInput(props.vehicle.insurance_expiry),
+    next_maintenance_date: toDateInput(props.vehicle.next_maintenance_date),
     next_maintenance_mileage: props.vehicle.next_maintenance_mileage || '',
     photo: null,
 });

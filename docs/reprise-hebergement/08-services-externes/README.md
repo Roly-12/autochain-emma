@@ -4,12 +4,12 @@
 
 Vérifier que les fonctions dépendant de services tiers fonctionnent réellement depuis l’hébergement.
 
-## SMTP
+## E-mail transactionnel
 
-- Configurer le serveur, le port, le chiffrement et les identifiants.
-- Configurer l’adresse d’expéditeur.
-- Mettre en place SPF, DKIM et DMARC sur le domaine.
-- Tester les e-mails MFA, les notifications et les erreurs de livraison.
+- Render Free bloque les ports SMTP 25, 465 et 587.
+- Utiliser `MAIL_MAILER=brevo` avec une clé API Brevo v3.
+- Vérifier l’adresse d’expéditeur configurée dans `MAIL_FROM_ADDRESS`.
+- Tester les codes MFA obligatoires et les erreurs de livraison.
 
 ## IPFS
 
@@ -41,4 +41,9 @@ Vérifier que les fonctions dépendant de services tiers fonctionnent réellemen
 
 ## Statut
 
-`Dernière étape avant ouverture aux testeurs`.
+`Services essentiels validés le 19/07/2026`.
+
+- OTP Brevo reçu.
+- Médias publics Supabase téléversés et servis.
+- RPC et transaction véhicule Sepolia validés.
+- IPFS reste optionnel et désactivé tant qu’aucun fournisseur n’est configuré.

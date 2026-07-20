@@ -126,7 +126,7 @@ def make_presentation():
     add_textbox(slide, 0.9, 1.65, 11.4, 1.05, "AutoChain Emma+", 42, WHITE, True)
     add_textbox(slide, 0.9, 2.85, 10.5, 0.85, "Gestion de flotte certifiée par la blockchain", 24, RGBColor(203, 213, 225))
     add_textbox(slide, 0.9, 5.7, 10.5, 0.45, "Parcours par rôle · MetaMask · Véhicules · Maintenance · Vente", 14, MUTED)
-    add_textbox(slide, 0.9, 6.5, 10.5, 0.3, "Version 1.0 — Juillet 2026", 10, RGBColor(129, 140, 248), True)
+    add_textbox(slide, 0.9, 6.5, 10.5, 0.3, "Version 1.1 — Déploiement validé en juillet 2026", 10, RGBColor(129, 140, 248), True)
 
     slides = [
         (
@@ -140,7 +140,7 @@ def make_presentation():
         (
             "Premiers pas", "Connexion et navigation",
             [
-                ("1. Se connecter", ["Utiliser l’adresse e-mail du compte métier.", "Saisir le code MFA lorsque la protection est activée."], INDIGO),
+                ("1. Se connecter", ["Utiliser l’adresse e-mail du compte métier.", "Saisir le code MFA reçu par e-mail : il est obligatoire pour tous."], INDIGO),
                 ("2. Lire le tableau de bord", ["Statistiques filtrées selon le rôle.", "Actions rapides et alertes uniquement si autorisées."], EMERALD),
                 ("3. Utiliser le menu Plus", ["Documents, carburant, alertes, ventes et utilisateurs.", "Les liens non autorisés sont automatiquement masqués."], RGBColor(14, 116, 144)),
             ],
@@ -226,6 +226,15 @@ def make_presentation():
                 ("2. Wallet MetaMask", ["Installer depuis metamask.io et créer un compte de test dédié.", "Conserver la phrase secrète hors ligne ; ne jamais la communiquer."], RGBColor(14, 116, 144)),
                 ("3. Réseau Sepolia", ["MetaMask → Réseaux → Afficher les réseaux de test → Sepolia.", "Vérifier le chain ID 11155111."], EMERALD),
                 ("4. ETH de test", ["Copier l’adresse publique et utiliser faucets.chain.link/sepolia.", "Vérifier le solde sur sepolia.etherscan.io puis lier le wallet dans AutoChain."], RGBColor(234, 88, 12)),
+            ],
+        ),
+        (
+            "Production", "Application hébergée et services externes",
+            [
+                ("Application", ["https://autochain-emma.onrender.com", "Render Free exécute une image Docker publique construite par GitHub Actions."], INDIGO),
+                ("Données et médias", ["PostgreSQL et stockage S3-compatible sur Supabase.", "Le bucket média public sert avatars, véhicules et logo global."], EMERALD),
+                ("E-mail et blockchain", ["Brevo envoie MFA et notifications via HTTPS.", "Sepolia chain ID 11155111 ; chaque signataire paie son gas de test."], RGBColor(234, 88, 12)),
+                ("Limites gratuites", ["Render peut mettre le service en veille.", "Queue synchrone et scheduler actif uniquement lorsque le service est éveillé."], RGBColor(100, 116, 139)),
             ],
         ),
         (
@@ -335,9 +344,9 @@ def make_pdf():
         Spacer(1, 3.8 * cm),
         Table(
             [
-                ["Version", "1.0"],
+                ["Version", "1.1"],
                 ["Date", "Juillet 2026"],
-                ["Environnement", "Laravel 13 · PostgreSQL · Vue 3 · Hardhat / Sepolia"],
+                ["Environnement", "Laravel 13 · Vue 3 · Render · Supabase · Brevo · Sepolia"],
                 ["Contact", "contact@autochain-emma.com · +242 06 878 18 44"],
             ],
             colWidths=[4 * cm, 10.5 * cm],
@@ -403,7 +412,7 @@ def make_pdf():
         "administratives des preuves techniques. PostgreSQL conserve les données métier et "
         "Ethereum conserve des empreintes, états et événements vérifiables. Le présent manuel "
         "décrit l’utilisation quotidienne, les contrôles de sécurité, l’exploitation locale et "
-        "le passage au réseau de test Sepolia."
+        "le déploiement validé sur https://autochain-emma.onrender.com avec le réseau Sepolia."
     )
     bullets([
         "Périmètre métier : véhicules, affectation, kilométrage, maintenance, documents, carburant, alertes et ventes.",
@@ -432,6 +441,14 @@ def make_pdf():
         "Après soumission du hash, le serveur contrôle le chain ID, l’adresse du contrat, le wallet "
         "émetteur, le calldata exact, le statut du receipt et la présence de l’événement attendu."
     )
+    h2("2.4 Architecture hébergée validée")
+    bullets([
+        "Application Docker sur Render Free, publiée depuis l’image ghcr.io/roly-12/autochain-emma:latest.",
+        "PostgreSQL persistant via le Session Pooler Supabase avec TLS obligatoire.",
+        "Avatars, photos, logo global et documents stockés dans deux buckets Supabase S3-compatible.",
+        "MFA et notifications envoyés par l’API HTTPS Brevo, car Render Free bloque les ports SMTP.",
+        "Contrat VehicleRegistry déployé sur Sepolia à l’adresse 0xB04b51e7B65684c409ff45d360342f0a82E18ea0.",
+    ])
 
     h1("3. Installation et exploitation")
     h2("3.1 Prérequis")
@@ -466,6 +483,14 @@ def make_pdf():
             ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ],
     ))
+    h2("3.3 Accès à l’environnement hébergé")
+    bullets([
+        "URL publique : https://autochain-emma.onrender.com.",
+        "Le premier accès après une période d’inactivité peut être ralenti par la veille de Render Free.",
+        "Toutes les connexions exigent un code MFA envoyé par Brevo à l’adresse du compte.",
+        "Dans MetaMask, sélectionner Sepolia et vérifier le chain ID 11155111 avant toute signature.",
+        "Les médias sont servis depuis le bucket public Supabase ; les documents privés restent dans leur bucket dédié.",
+    ])
 
     h1("4. Rôles et autorisations")
     role_data = [
@@ -496,7 +521,8 @@ def make_pdf():
     h2("5.1 Connexion applicative")
     bullets([
         "Les comptes inactifs sont bloqués globalement.",
-        "Le MFA par e-mail utilise un code à six chiffres, une expiration et une limitation des essais.",
+        "Le MFA par e-mail est obligatoire pour tous les rôles et utilise un code à six chiffres valable dix minutes.",
+        "Brevo transmet les codes via son API HTTPS ; aucun code ne doit être recherché dans les logs en exploitation normale.",
         "Les sessions sont régénérées après authentification et invalidées à la déconnexion.",
     ])
     h2("5.2 Liaison MetaMask")
@@ -677,8 +703,9 @@ def make_pdf():
         "Tests Laravel : comptes inactifs, MFA, rôles, documents, carburant, alertes, transactions et réconciliation.",
         "Tests Solidity : 25 scénarios couvrant permissions, statuts, kilométrage, maintenance et vente.",
         "Test d’intégration Laravel vers Hardhat : chain ID, bytecode du contrat et administrateur.",
-        "Build Vite et tests PostgreSQL exécutés dans la CI.",
-        "Le déploiement Sepolia est déclenché seulement après une CI réussie et l’approbation de l’environnement.",
+        "Build Vite, tests PostgreSQL et publication de l’image Docker exécutés dans GitHub Actions.",
+        "Render déploie l’image GHCR afin d’éviter les problèmes de clonage Git depuis la plateforme.",
+        "La création d’un véhicule a été signée et confirmée sur Sepolia depuis l’application hébergée.",
     ])
 
     h1("15. Dépannage")
@@ -691,7 +718,9 @@ def make_pdf():
         ["403", "Le rôle ne possède pas la permission", "Vérifier le compte connecté et la matrice des rôles."],
         ["Transaction submitted", "Receipt pas encore disponible", "Attendre le worker ou lancer blockchain:reconcile."],
         ["Document 409", "SHA-256 différent", "Restaurer l’original et auditer le stockage."],
-        ["Logo absent", "Aucun logo Super Admin configuré", "Profil Admin → téléverser le logo de l’entreprise."],
+        ["Code MFA absent", "Clé Brevo invalide ou expéditeur non vérifié", "Vérifier BREVO_API_KEY et MAIL_FROM_ADDRESS."],
+        ["Image absente", "URL publique ou identifiants S3 Supabase incorrects", "Vérifier le Project URL, les clés S3 et le bucket public."],
+        ["Logo absent", "Aucun logo Super Admin ou URL média incorrecte", "Profil Admin → téléverser le logo puis contrôler SUPABASE_MEDIA_URL."],
     ]
     story.append(Table(
         [[Paragraph(str(c), styles["BodyCustom"]) for c in row] for row in troubleshooting],
@@ -711,7 +740,7 @@ def make_pdf():
     h2("Quotidien")
     bullets([
         "Vérifier les alertes critiques et les transactions submitted.",
-        "Contrôler le queue worker et le scheduler.",
+        "Contrôler le scheduler best effort ; la queue est synchrone sur l’offre Render Free.",
         "Examiner les échecs de notification et les journaux d’accès documentaire.",
     ])
     h2("Avant une démonstration")
@@ -723,7 +752,7 @@ def make_pdf():
     ])
     h2("Sauvegarde et continuité")
     bullets([
-        "Sauvegarder PostgreSQL et les documents locaux.",
+        "Sauvegarder PostgreSQL Supabase et les deux buckets de stockage.",
         "Conserver deployment.json et les hashes de transaction.",
         "Ne jamais sauvegarder les secrets dans le dépôt Git.",
         "Tester périodiquement la restauration et la commande blockchain:reconcile.",
@@ -735,7 +764,7 @@ def make_pdf():
         Paragraph(
             "E-mail : contact@autochain-emma.com<br/>"
             "Téléphone : +242 06 878 18 44<br/>"
-            "Application : AutoChain Emma+",
+            "Application : https://autochain-emma.onrender.com",
             styles["BodyCustom"],
         ),
     ]))

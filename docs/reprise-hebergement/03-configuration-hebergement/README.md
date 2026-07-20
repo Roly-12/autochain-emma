@@ -30,7 +30,7 @@ Préparer un environnement Laravel de production sécurisé et compatible avec P
 - Paramètres PostgreSQL
 - `SESSION_SECURE_COOKIE=true`
 - Paramètres RPC, contrat et chain ID Sepolia
-- Paramètres SMTP et IPFS
+- Paramètres Brevo HTTPS et IPFS
 - Canal de logs adapté à l’hébergeur
 
 ## Validation
@@ -42,7 +42,7 @@ Préparer un environnement Laravel de production sécurisé et compatible avec P
 
 ## Statut
 
-`Configuration Render gratuite préparée le 18/07/2026`.
+`Hébergement Render gratuit opérationnel le 19/07/2026`.
 
 - Plateforme : Render Web Service gratuit avec Docker.
 - Base PostgreSQL : Supabase Emma+ en `eu-west-1`.
@@ -51,12 +51,11 @@ Préparer un environnement Laravel de production sécurisé et compatible avec P
 - Scheduler : best effort pendant que le service Web est éveillé.
 - Blockchain : contrat Sepolia `0xB04b51e7B65684c409ff45d360342f0a82E18ea0`.
 - Fichiers créés : `Dockerfile`, `docker/entrypoint.sh`, `.dockerignore` et `render.yaml`.
+- Déploiement : image publique `ghcr.io/roly-12/autochain-emma:latest`, utilisée pour contourner le clonage GitHub refusé par Render.
+- URL publique : https://autochain-emma.onrender.com.
+- E-mail : API HTTPS Brevo, les ports SMTP étant bloqués sur Render Free.
+- Validation : migrations, Super Admin, médias Supabase, OTP Brevo et transaction véhicule Sepolia réussis.
 
-Restent à saisir directement dans Render :
-
-- `APP_KEY`.
-- `DB_URL` obtenue avec le Session Pooler Supabase.
-- Identifiants S3 Supabase.
-- Adresse e-mail et mot de passe initial du Super Admin.
+Les secrets restent saisis uniquement dans Render et ne doivent jamais être recopiés dans Git.
 
 Le service gratuit se met en veille après quinze minutes et ne doit pas être présenté comme une production permanente.
